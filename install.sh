@@ -2,7 +2,11 @@
 packagelist=/tmp/packages.txt
 
 echo "Checking for Updates"
-apt-get update && apt-get -yq dist-upgrade && apt-get clean
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FDA5DFFC \
+&& echo "deb http://apt.sonarr.tv/ master main" | sudo tee /etc/apt/sources.list.d/sonarr.list \
+&& apt-get update \
+&& apt-get -yq dist-upgrade \
+&& apt-get clean
 
 echo "Creating Directory Structure..."
 mkdir -p /var/www/{rutorrent,organizr} \
@@ -12,13 +16,15 @@ mkdir -p /var/www/{rutorrent,organizr} \
 cd /tmp \
 && wget https://raw.githubusercontent.com/FlixXR/Media-Server/master/packages.txt \
 && echo "Installing and Updating Required Dependencies.."
-xargs -a <(awk '! /^ *(#|$)/' "$packagelist") -r -- apt-get -yqq install
+xargs -a <(awk '! /^ *(#|$)/' "$packagelist") -r -- apt-get -yqq install \
+&& apt-get update \
+&& apt-get -yqq upgrade \
+&& apt-get clean
 
 #clone repo
 git clone https://github.com/flixxr/flixxr /tmp/configs \
 && name=$(whiptail --inputbox "Enter your root domain [i.e example.com not www.example.com]" 15 45 3>&1 1>&2 2>&3) \
 && echo "Is $name correct?" > /dev/null 2>&1 \
-&& whiptail --ok-button Continue --msgbox "Using $name for our domain" 10 30 \
 && grep -rl example.com /tmp/configs | xargs sed -i 's/example.com/"$NAME"/g'
 
 echo "Installing our Apps.."
@@ -48,12 +54,6 @@ pip install --upgrade pyopenssl \
 && git clone https://github.com/CouchPotato/CouchPotatoServer.git couchpotato
 sleep 2
 
-echo " Sonarr - Automatically grabs TV Shows for Download via Usenet/Torrent"
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FDA5DFFC \
-&& echo "deb http://apt.sonarr.tv/ master main" | sudo tee /etc/apt/sources.list.d/sonarr.list > /dev/null 2>&1 \
-&& apt-get -yqq update && apt-get -yqq install nzbdrone
-sleep 2
-
 echo "Jackett - Integrates Public Torrent Trackers into Sonarr/Radarr"
 wget -q https://github.com/Jackett/Jackett/releases/download/v0.8.237/Jackett.Binaries.Mono.tar.gz \
 && tar -xvzf Jackett.Binaries.Mono.tar.gz \
@@ -71,14 +71,13 @@ wget https://nzbget.net/download/nzbget-latest-bin-linux.run \
 sleep 2
 
 echo "rTorrent + ruTorrent + Flood - our Torrent Downloader with 2 web UI's"
-apt -yqq install rtorrent \
-&& git clone https://github.com/Novik/ruTorrent.git /var/www/rutorrent \
+git clone https://github.com/Novik/ruTorrent.git /var/www/rutorrent \
 && git clone https://github.com/jfurrow/flood.git /var/www/flood \
 && cd /tmp \
 && wget https://nodejs.org/dist/v7.4.0/node-v7.4.0-linux-x64.tar.xz \
 && tar -xvJf node-v7.4.0-linux-x64.tar.xz \
 && rm -f node-v7.4.0-linux-x64.tar.xz \
-&& mv node-v7.4.0-linux-x64.tar /opt/node \
+&& mv node-v7.4.0-linux-x64 /opt/node \
 && cd /opt/node/bin \
 && ln -s /opt/node/bin/node /usr/local/bin/node \
 && ln -s /opt/node/bin/npm /usr/local/bin/npm \
@@ -126,16 +125,19 @@ sleep 2
 
 echo "Plex-Board - Monitors Status of Our Apps"
 apt-add-repository -y ppa:rael-gc/rvm \
-&& apt-get update && apt-get -yqq install rvm \
+&& apt-get update \
+&& apt-get -yqq install rvm \
 && source /etc/profile.d/rvm.sh \
 && rvm install 2.4.2 \
+&& rvm install 2.4.1 \
 && git clone https://github.com/scytherswings/Plex-Board.git /var/www/plexboard \
 && cd /var/www/plexboard \
-&& ./serverSetup.sh
+&& ./serverSetup.sh \
+&& chown -R www-data: /var/www/* \
+&& chmod -R 775 /var/www/*
 
 echo "Setting up Web Server..."
-apt-get -yqq install nginx-full \
-&& mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bk \
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bk \
 && unlink /etc/nginx/sites-enabled/default \
 && mv /etc/nginx/sites-available/default /etc/nginx/default_vhost.bk \
 && cp -r /tmp/configs/nginx/* /etc/nginx/ \
