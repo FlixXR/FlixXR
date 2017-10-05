@@ -1,0 +1,11 @@
+[Unit]
+Description=Wetty - Browser Based Terminal
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/wetty
+ExecStart=/usr/local/bin/node app.js -p 4200
+User=root
+
+[Install]
+WantedBy=multi-user.target

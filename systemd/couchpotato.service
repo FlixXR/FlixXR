@@ -1,0 +1,13 @@
+[Unit]
+Description=CouchPotato
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/couchpotato
+ExecStart=/usr/bin/python CouchPotato.py
+Type=simple
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

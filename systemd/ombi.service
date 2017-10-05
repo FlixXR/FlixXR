@@ -1,0 +1,15 @@
+[Unit]
+Description=PlexRequests
+After=network-online.target
+
+[Service]
+User=root
+Group=root
+Type=simple
+ExecStart=/usr/bin/mono /opt/Ombi/Release/Ombi.exe
+TimeoutStopSec=30
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
