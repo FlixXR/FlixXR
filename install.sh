@@ -19,7 +19,7 @@ git clone https://github.com/flixxr/flixxr /tmp/configs \
 && name=$(whiptail --inputbox "Enter your root domain [i.e example.com not www.example.com]" 15 45 3>&1 1>&2 2>&3) \
 && echo "Is $name correct?" > /dev/null 2>&1 \
 && whiptail --ok-button Continue --msgbox "Using $name for our domain" 10 30 \
-&& grep -rl example.com /tmp/configs | xargs sed -i 's/example.com/$name/g'
+&& grep -rl example.com /tmp/configs | xargs sed -i 's/example.com/"$NAME"/g'
 
 echo "Installing our Apps.."
 sleep 1
@@ -78,7 +78,7 @@ apt -yqq install rtorrent \
 && wget https://nodejs.org/dist/v7.4.0/node-v7.4.0-linux-x64.tar.xz \
 && tar -xvJf node-v7.4.0-linux-x64.tar.xz \
 && rm -f node-v7.4.0-linux-x64.tar.xz \
-&& mv node-v7.4.0-linux-x64.tar.xz /opt/node \
+&& mv node-v7.4.0-linux-x64.tar /opt/node \
 && cd /opt/node/bin \
 && ln -s /opt/node/bin/node /usr/local/bin/node \
 && ln -s /opt/node/bin/npm /usr/local/bin/npm \
@@ -96,7 +96,7 @@ cd /var/www/rutorrent \
 && cd plugins \
 && wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/rutorrent-tadd-labels/lbll-suite_0.8.1.tar.gz \
 && tar -zxvf lbll-suite_0.8.1.tar.gz \
-&& rm lbll-suite-0.8.1.tar.gz \
+&& rm lbll-suite_0.8.1.tar.gz \
 && git clone https://github.com/xombiemp/rutorrentMobile.git mobile \
 && git clone https://github.com/autodl-community/autodl-rutorrent.git autodl-irssi \
 && cp autodl-irssi/_conf.php autodl-irssi/conf.php \
@@ -144,7 +144,8 @@ apt-get -yqq install nginx-full \
 
 echo "Configuring Services.."
 cp /tmp/configs/systemd/* /etc/systemd/system/ \
-&& ls -A1 /tmp/configs/systemd | xargs systemctl enable --now
+&& cd /tmp/configs/systemd \
+&& for x in *.service; do systemctl enable --now $x; done
 
 echo "Last but not Least. Installing Plex"
 git clone https://github.com/mrworf/plexupdate.git /opt/plexupate \
