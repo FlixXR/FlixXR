@@ -1,4 +1,5 @@
 #/bin/bash
+packagelist=/tmp/packages.txt
 
 echo "Checking for Updates"
 apt-get update && apt-get -yq dist-upgrade && apt-get clean
@@ -10,8 +11,8 @@ mkdir -p /var/www/{rutorrent,organizr} \
 
 cd /tmp \
 && wget https://raw.githubusercontent.com/FlixXR/Media-Server/master/packages.txt \
-&& echo "Installing and Updating Required Dependencies.." \
-&& xargs -a /tmp/packages.txt apt-get -yqq install
+&& echo "Installing and Updating Required Dependencies.."
+xargs -a <(awk '! /^ *(#|$)/' "$packagelist") -r -- apt-get install
 
 #clone repo
 git clone https://github.com/flixxr/flixxr /tmp/configs \
