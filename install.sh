@@ -16,8 +16,8 @@ mkdir -p /var/www/{rutorrent,organizr} \
 cd /tmp \
 && wget https://raw.githubusercontent.com/FlixXR/Media-Server/master/packages.txt \
 && echo "Installing and Updating Required Dependencies.."
-xargs -a <(awk '! /^ *(#|$)/' "$packagelist") -r -- apt-get -yqq install
-apt-get update && apt-get -yqq upgrade && apt-get clean
+xargs -a <(awk '! /^ *(#|$)/' "$packagelist") -r -- apt-get -yq install
+apt-get update && apt-get -yq upgrade && apt-get clean
 
 #clone repo
 git clone https://github.com/flixxr/flixxr /tmp/configs \
@@ -124,7 +124,7 @@ sleep 2
 echo "Plex-Board - Monitors Status of Our Apps"
 apt-add-repository -y ppa:rael-gc/rvm \
 && apt-get update \
-&& apt-get -yqq install rvm \
+&& apt-get -yq install rvm \
 && source /etc/profile.d/rvm.sh \
 && rvm install 2.4.2 \
 && rvm install 2.4.1 \
