@@ -8,10 +8,10 @@ mkdir -p /var/www/{rutorrent,organizr} \
 && mkdir -p /srv/downloads/{complete,incomplete,watch,convert} \
 && mkdir -p /srv/media/{'Kids TV Shows',Movies,'TV Shows','Kids Movies'}
 
-echo "Installing and Updating Required Dependencies.."
 cd /tmp \
 && wget https://raw.githubusercontent.com/FlixXR/Media-Server/master/packages.txt \
-&& xargs -a /tmp/packages.txt apt-get install > /dev/null 2>&1
+&& echo "Installing and Updating Required Dependencies.." \
+&& xargs -a /tmp/packages.txt apt-get -yqq install > /dev/null 2>&1
 
 #clone repo
 git clone https://github.com/flixxr/flixxr /tmp/configs \
