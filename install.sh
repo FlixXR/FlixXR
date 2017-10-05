@@ -11,7 +11,7 @@ mkdir -p /var/www/{rutorrent,organizr} \
 cd /tmp \
 && wget https://raw.githubusercontent.com/FlixXR/Media-Server/master/packages.txt \
 && echo "Installing and Updating Required Dependencies.." \
-&& xargs -a /tmp/packages.txt apt-get -yqq install > /dev/null 2>&1
+&& xargs -a /tmp/packages.txt apt-get -yqq install
 
 #clone repo
 git clone https://github.com/flixxr/flixxr /tmp/configs \
