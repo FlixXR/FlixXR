@@ -71,7 +71,7 @@ wget https://nzbget.net/download/nzbget-latest-bin-linux.run \
 sleep 2
 
 echo "rTorrent + ruTorrent + Flood - our Torrent Downloader with 2 web UI's"
-apt-install rtorrent \
+apt -yqq install rtorrent \
 && git clone https://github.com/Novik/ruTorrent.git /var/www/rutorrent \
 && git clone https://github.com/jfurrow/flood.git /var/www/flood \
 && wget https://nodejs.org/download/release/v7.4.0/node-v7.4.0.tar.gz \
