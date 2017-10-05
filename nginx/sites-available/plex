@@ -1,0 +1,48 @@
+#ssl_session_cache shared:SSL:10m;
+#ssl_session_timeout 10m;
+
+upstream plex_backend {
+    server 127.0.0.1:32400;
+    keepalive 32;
+}
+
+server {
+	listen 80;
+#	listen 443 ssl http2;
+	server_name plex.example.com;
+
+	send_timeout 100m; 
+
+	resolver 8.8.4.4 8.8.8.8 valid=300s;
+	resolver_timeout 10s;
+
+	gzip on;
+	gzip_vary on;
+	gzip_min_length 1000;
+	gzip_proxied any;
+	gzip_types text/plain text/html text/css text/xml application/xml text/javascript application/x-javascript image/svg+xml;
+	gzip_disable "MSIE [1-6]\.";
+
+#	include snippets/ssl-params.conf;
+
+	client_max_body_size 100M;
+
+	proxy_set_header Host $host;
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_set_header X-Forwarded-Proto $scheme;
+
+	proxy_http_version 1.1;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+
+  proxy_hide_header X-Powered-By;
+  proxy_hide_header X-Frame-Options;
+  add_header Content-Security-Policy: "frame-ancestors http://example.com https://example.com http://www.example.com https://www.example.com";
+
+	proxy_redirect off;
+	proxy_buffering off;
+
+	location / {
+		proxy_pass http://plex_backend;
+	}

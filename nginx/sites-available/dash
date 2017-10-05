@@ -1,0 +1,37 @@
+upstream app {
+    server unix:////var/www/plexboard/tmp/sockets/puma.sock fail_timeout=0;
+}
+### HTTP — redirect all traffic to HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+#    return 301 https://$host$request_uri;
+#}
+#server {
+#    listen 443 ssl http2;
+#    listen [::]:443 ssl http2;
+    server_name dash.domain.com;
+    root /var/www/plexboard;
+
+    chunked_transfer_encoding off;
+    try_files $uri/index.html $uri @app;
+
+    ### Include the SSL configuration
+#    include snippets/ssl-params.conf;
+     include snippets/letsencrypt.conf;
+
+     error_page 400 401 402 403 404 500 502 /error.php?error=$status;
+     
+location @app {
+      include snippets/proxy.conf;
+      proxy_pass http://app;
+
+      proxy_bind $server_addr;    
+      proxy_hide_header X-Powered-By;
+      proxy_hide_header X-Frame-Options;
+      #proxy_set_header X-Forwarded-Ssl on;
+      #proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header X-Forwarded-Host $server_name;
+      add_header Content-Security-Policy: "frame-ancestors http://example.com https://example.com http://www.example.com https://www.example.com";
+}
+}
