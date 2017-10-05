@@ -14,8 +14,8 @@ cd /tmp \
 && xargs -a /tmp/packages.txt apt-get install > /dev/null 2>&1
 
 #clone repo
-git clone https://github.com/flixxr/mediastack /tmp/configs \
-name=$(whiptail --inputbox "Enter your root domain [i.e example.com not www.example.com]" 15 45 3>&1 1>&2 2>&3) \
+git clone https://github.com/flixxr/flixxr /tmp/configs \
+&& name=$(whiptail --inputbox "Enter your root domain [i.e example.com not www.example.com]" 15 45 3>&1 1>&2 2>&3) \
 && echo "Is $name correct?" > /dev/null 2>&1 \
 && whiptail --ok-button Continue --msgbox "Using $name for our domain" 10 30 \
 && grep -rl example.com /tmp/configs | xargs sed -i 's/example.com/$name/g'
