@@ -74,13 +74,14 @@ echo "rTorrent + ruTorrent + Flood - our Torrent Downloader with 2 web UI's"
 apt -yqq install rtorrent \
 && git clone https://github.com/Novik/ruTorrent.git /var/www/rutorrent \
 && git clone https://github.com/jfurrow/flood.git /var/www/flood \
-&& wget https://nodejs.org/download/release/v7.4.0/node-v7.4.0.tar.gz \
-&& tar xvf node-v7.4.0.tar.gz \
-&& rm -f node-v7.4.0.tar.gz \
-&& cd node-v7.4.0 \
-&& ./configure \
-&& make -j2 \
-&& make install \
+&& cd /tmp \
+&& wget https://nodejs.org/dist/v7.4.0/node-v7.4.0-linux-x64.tar.xz \
+&& tar -xvJf node-v7.4.0-linux-x64.tar.xz \
+&& rm -f node-v7.4.0-linux-x64.tar.xz \
+&& mv node-v7.4.0-linux-x64.tar.xz /opt/node \
+&& cd /opt/node/bin \
+&& ln -s /opt/node/bin/node /usr/local/bin/node \
+&& ln -s /opt/node/bin/npm /usr/local/bin/npm \
 && cd /var/www/flood \
 && cp /tmp/configs/flood/config.js . \
 && npm install --production \
@@ -90,11 +91,11 @@ sleep 2
 
 echo "ruTorrent Plugins"
 cd /var/www/rutorrent \
-&& rm -r plugins \
+&& mv plugins plugins.old \
 && svn checkout https://github.com/Novik/ruTorrent/trunk/plugins plugins \
 && cd plugins \
 && wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/rutorrent-tadd-labels/lbll-suite_0.8.1.tar.gz \
-&& tar zxvf lbll-suite_0.8.1.tar.gz \
+&& tar -zxvf lbll-suite_0.8.1.tar.gz \
 && rm lbll-suite-0.8.1.tar.gz \
 && git clone https://github.com/xombiemp/rutorrentMobile.git mobile \
 && git clone https://github.com/autodl-community/autodl-rutorrent.git autodl-irssi \
@@ -111,7 +112,7 @@ cd /var/www/rutorrent/plugins/theme/themes \
 && svn co https://github.com/ArtyumX/ruTorrent-Themes/trunk/FlatUI_Dark flatdark \
 && svn co https://github.com/ArtyumX/ruTorrent-Themes/trunk/FlatUI_Material flatmaterial \
 && svn co https://github.com/ArtyumX/ruTorrent-Themes/trunk/club-QuickBox quickbox \
-&& sudo perl -pi -e "s/\$defaultTheme \= \"\"\;/\$defaultTheme \= \"material\"\;/g" /var/www/html/rutorrent/plugins/theme/conf.php
+&& sudo perl -pi -e "s/\$defaultTheme \= \"\"\;/\$defaultTheme \= \"material\"\;/g" /var/www/rutorrent/plugins/theme/conf.php
 
 echo "Wetty - Terminal in a Web Browser"
 git clone https://github.com/krishnasrinivas/wetty /opt/wetty \
@@ -130,10 +131,11 @@ apt-add-repository -y ppa:rael-gc/rvm \
 && rvm install 2.4.2 \
 && git clone https://github.com/scytherswings/Plex-Board.git /var/www/plexboard \
 && cd /var/www/plexboard \
-&& sh serverSetup.sh
+&& ./serverSetup.sh
 
 echo "Setting up Web Server..."
-mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bk \
+apt-get -yqq install nginx-full \
+&& mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bk \
 && unlink /etc/nginx/sites-enabled/default \
 && mv /etc/nginx/sites-available/default /etc/nginx/default_vhost.bk \
 && cp -r /tmp/configs/nginx/* /etc/nginx/ \
@@ -163,31 +165,3 @@ EOF
 
 ## Config Set...Installing Plex
 ./plexupdate.sh -vP --config /opt/plexupdate/plexupdate.conf
-
-echo "LetsEncrypt for HTTPS on our sites"
-git clone https://github.com/Neilpang/acme.sh.git /opt/letsencrypt \
-&& cd /opt/letsencrypt \
-&& systemctl stop nginx.service \
-&& ./acme.sh --install \
-&& exec bash --login \
-&& cd /opt/letsencrypt \
-&& ./acme.sh --issue -d "$name" --standalone -d www."$name" -d couchpotato."$name" \
--d dash."$name" -d flood."$name" -d hydra."$name" -d jackett."$name" -d nzbget."$name" -d plex."$name" \
--d plexpy."$name" -d radarr."$name" -d requests."$name" -d rtorrent."$name" -d shell."$name" -d sonarr."$name"
-
-if whiptail --yesno "Was our letsencrypt request succesfull" 20 60 ;then
-    echo "Awesome. Restarting services and were done" \
-    && grep -rl '#' /etc/nginx/sites-available/ | xargs sed -i '' 's/^#\(.*\)/\1/g' \
-    && systemctl start nginx 
-else
-    echo "please fix any errors and rerun the script"
-fi
-
-
-
-
-
-
-
-
-
